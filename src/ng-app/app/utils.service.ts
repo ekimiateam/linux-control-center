@@ -27,9 +27,12 @@ import * as path from 'path';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { BehaviorSubject } from 'rxjs';
 import { ConfirmDialogData, ConfirmDialogResult, DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
+import { ChoiceDialogData, ConfirmChoiceResult, DialogChoiceComponent } from './dialog-choice/dialog-choice.component';
+
 import { MatDialog } from '@angular/material/dialog';
 import { ITccProfile } from '../../common/models/TccProfile';
 import { DefaultProfileIDs, IProfileTextMappings, LegacyDefaultProfileIDs } from '../../common/models/DefaultProfiles';
+import { DialogInputTextComponent } from './dialog-input-text/dialog-input-text.component';
 
 @Injectable({
   providedIn: 'root'
@@ -63,11 +66,7 @@ export class UtilsService {
         this.languageMap[lang.id] = lang;
       }
 
-      if (localStorage.getItem('themeClass')) {
-        this.themeClass = new BehaviorSubject<string>(localStorage.getItem('themeClass'));
-      } else {
-        this.themeClass = new BehaviorSubject<string>('light-theme');
-      }
+      this.themeClass = new BehaviorSubject(undefined);
     }
 
   public async execCmd(command: string): Promise<Buffer> {
@@ -77,6 +76,52 @@ export class UtilsService {
           resolve(result.data);
         } else {
           reject(result.error);
+        }
+      });
+    });
+  }
+
+  // get Path, e.g. home path  https://www.electronjs.org/docs/latest/api/app#appgetpathname
+  public async getPath(path: string): Promise<string>
+  {
+    return new Promise<string>((resolve, reject) => {
+        this.electron.ipcRenderer.invoke('get-path', path).then((result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(result);
+          }
+        });
+      });
+  }
+
+
+   // Opens a file dialog (systems file dialog) and returns selected path or false if canceled
+   // for selecting existing files
+   // needs to be modified if you need more than one file (and you need to give it the multiSelections flag https://www.electronjs.org/de/docs/latest/api/dialog)
+  public async openFileDialog(properties): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+      this.electron.ipcRenderer.invoke('show-open-dialog', properties).then((result) => {
+        if (result.canceled) {
+            reject(result.canceled);
+          } else {
+            resolve(result.filePaths);
+          }
+      });
+    });
+  }
+
+
+  // Opens a file dialog (systems file dialog) and returns selected path or false if canceled
+  // for selecting a non existing file (saving)
+  // does not save anything, just returns a path
+  public async saveFileDialog(properties): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+      this.electron.ipcRenderer.invoke('show-save-dialog', properties).then((result) => {
+        if (result.canceled) {
+          reject(result.canceled);
+        } else {
+          resolve(result.filePath);
         }
       });
     });
@@ -146,6 +191,23 @@ export class UtilsService {
     });
   }
 
+
+  public async readTextFile(filePath: string, ): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      try {
+        fs.readFile(filePath,(err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data + "");
+          }
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
   public async modFile(filePath: string, mode: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       fs.chmod(filePath, mode, err => {
@@ -190,10 +252,30 @@ export class UtilsService {
     return this.themeClass.value;
   }
 
+  public async setBrightnessMode(mode: 'light' | 'dark' | 'system') {
+    return await this.electron.ipcRenderer.invoke('set-brightness-mode', mode);
+  }
+
+  public async getBrightnessMode(): Promise<'light' | 'dark' | 'system'> {
+    return await this.electron.ipcRenderer.invoke('get-brightness-mode');
+  }
+
+  public async getShouldUseDarkColors(): Promise<boolean> {
+    return this.electron.ipcRenderer.invoke('get-should-use-dark-colors');
+  }
+
+  /**
+   * Note: Only for updating web part, to change behaviour use setBrightnessMode
+   */
   public setThemeClass(className: string) {
+    if (className == "light-theme") {
+        this.overlayContainer.getContainerElement().classList.remove("dark-theme");
+    }
+    if (className == "dark-theme") {
+        this.overlayContainer.getContainerElement().classList.remove("light-theme");
+    }
     this.overlayContainer.getContainerElement().classList.add(className);
     this.themeClass.next(className);
-    localStorage.setItem('themeClass', className);
   }
 
   public setThemeLight() {
@@ -203,6 +285,14 @@ export class UtilsService {
   public setThemeDark() {
     this.setThemeClass('dark-theme');
   }
+
+  public async updateBrightnessMode() {
+    if (await this.getShouldUseDarkColors()) {
+        this.setThemeDark();
+    } else {
+        this.setThemeLight();
+    }
+}
 
   public async confirmDialog(config: ConfirmDialogData): Promise<ConfirmDialogResult> {
     const dialogRef = this.dialog.open(DialogConfirmComponent, {
@@ -220,6 +310,31 @@ export class UtilsService {
     return result;
   }
 
+  public async choiceDialog(config: ChoiceDialogData): Promise<ConfirmChoiceResult> {
+    const dialogRef = this.dialog.open(DialogChoiceComponent, {
+      minWidth: 350,
+      maxWidth: 550,
+      data: config,
+      autoFocus: false
+    });
+    let result: ConfirmChoiceResult =  await dialogRef.afterClosed().toPromise();
+    if (result === undefined) {
+      result = {
+        value: undefined,
+        noBother: false
+      };
+    }
+    return result;
+  }
+
+  public async inputTextDialog(config: any) {
+    const dialogRef = this.dialog.open(DialogInputTextComponent, {
+      minWidth: 350,
+      data: config,
+    });
+    return dialogRef.afterClosed().toPromise();
+  }
+  
   private defaultProfileInfos = new Map<string, IProfileTextMappings>();
 
   public fillDefaultProfileTexts(profile: ITccProfile) {

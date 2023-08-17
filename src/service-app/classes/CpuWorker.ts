@@ -218,7 +218,10 @@ export class CpuWorker extends DaemonWorker {
                 // Skip offline cores
                 continue;
             }
-            if (profile.cpu.noTurbo !== true) { // Only attempt to enforce frequencies if noTurbo isn't set
+
+            // Also Skip min/max freq validation on intel_pstate meanwhile bugged
+            // ie scaling_max_freq readout does not stay at cpuinfo_max_freq
+            if (profile.cpu.noTurbo !== true && this.cpuCtrl.cores[0].scalingDriver.readValueNT() !== 'intel_pstate') { // Only attempt to enforce frequencies if noTurbo isn't set
                 scalingDriver = core.scalingDriver.readValueNT();
                 const coreAvailableFrequencies = core.scalingAvailableFrequencies.readValueNT();
                 const coreMinFreq = core.cpuinfoMinFreq.readValue();
@@ -296,6 +299,12 @@ export class CpuWorker extends DaemonWorker {
         if (this.cpuCtrl.boost.isAvailable() && scalingDriver === ScalingDriver.acpi_cpufreq) {
             const currentBoost = this.cpuCtrl.boost.readValue()
             const coreMaxFreq = this.cpuCtrl.cores[0].cpuinfoMaxFreq.readValue();
+            const availableFreqs = this.cpuCtrl.cores[0].scalingAvailableFrequencies.readValueNT();
+            let maxSelectableFreq;
+            if (availableFreqs !== undefined && availableFreqs.length > 0) {
+                maxSelectableFreq = Math.max(...availableFreqs);
+            }
+
             const maxFreqProfile = profile.cpu.scalingMaxFrequency;
             if (profile.cpu.useMaxPerfGov) {
                 if (!currentBoost) {
@@ -304,11 +313,11 @@ export class CpuWorker extends DaemonWorker {
                 }
             }
             else {
-                if ((maxFreqProfile === undefined || maxFreqProfile > coreMaxFreq) && !currentBoost) {
+                if ((maxFreqProfile === undefined || (maxSelectableFreq !== undefined && maxFreqProfile > maxSelectableFreq)) && !currentBoost) {
                     cpuFreqValidConfig = false;
                     this.tccd.logLine('CpuWorker: Unexpected value boost => false instead of true');
                 }
-                else if ((maxFreqProfile === -1 || maxFreqProfile <= coreMaxFreq) && currentBoost) {
+                else if ((maxFreqProfile === -1 || (maxSelectableFreq !== undefined && maxFreqProfile <= maxSelectableFreq)) && currentBoost) {
                     cpuFreqValidConfig = false;
                     this.tccd.logLine('CpuWorker: Unexpected value boost => true instead of false');
                 }

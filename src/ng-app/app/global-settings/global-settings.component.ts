@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2019-2020 TUXEDO Computers GmbH <tux@tuxedocomputers.com>
+ * Copyright (c) 2019-2023 TUXEDO Computers GmbH <tux@tuxedocomputers.com>
  *
  * This file is part of TUXEDO Control Center.
  *
@@ -22,6 +22,8 @@ import { ConfigService } from '../config.service';
 import { UtilsService } from '../utils.service';
 import { Subscription } from 'rxjs';
 import { TccDBusClientService } from '../tcc-dbus-client.service';
+import { FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
     selector: 'app-global-settings',
@@ -40,15 +42,22 @@ export class GlobalSettingsComponent implements OnInit {
 
     public cpuSettingsEnabled: boolean = true;
     public fanControlEnabled: boolean = true;
+    public keyboardBacklightControlEnabled: boolean = true;
     public forceYUV420OutputSwitchAvailable: boolean = false;
     public ycbcr420Workaround: Array<Object> = [];
+
+    public ctrlBrightnessMode = new FormControl();
+
+    public hasChargingSettings = false;
 
     private subscriptions: Subscription = new Subscription();
 
     constructor(
         private config: ConfigService,
         private utils: UtilsService,
-        private tccdbus: TccDBusClientService
+        private tccdbus: TccDBusClientService,
+        private router: Router,
+        private route: ActivatedRoute,
     ) { }
 
     ngOnInit() {
@@ -58,12 +67,15 @@ export class GlobalSettingsComponent implements OnInit {
 
         this.cpuSettingsEnabled = this.config.getSettings().cpuSettingsEnabled;
         this.fanControlEnabled = this.config.getSettings().fanControlEnabled;
+        this.keyboardBacklightControlEnabled = this.config.getSettings().keyboardBacklightControlEnabled;
         for (let card = 0; card < this.config.getSettings().ycbcr420Workaround.length; card++) {
             this.ycbcr420Workaround[card] = {};
             for (let port in this.config.getSettings().ycbcr420Workaround[card]) {
                 this.ycbcr420Workaround[card][port] = this.config.getSettings().ycbcr420Workaround[card][port];
             }
         }
+
+        this.utils.getBrightnessMode().then((mode) => { this.ctrlBrightnessMode.setValue(mode) });
     }
 
     onCPUSettingsEnabledChanged(event: any) {
@@ -98,6 +110,22 @@ export class GlobalSettingsComponent implements OnInit {
         });
     }
 
+    onKeyboardBacklightControlEnabledChanged(event: any) {
+        this.utils.pageDisabled = true;
+
+        this.config.getSettings().keyboardBacklightControlEnabled = event.checked;
+        
+        this.config.saveSettings().then(success => {
+            if (!success) {
+                this.config.getSettings().keyboardBacklightControlEnabled = !event.checked;
+            }
+
+            this.keyboardBacklightControlEnabled = this.config.getSettings().keyboardBacklightControlEnabled;
+
+            this.utils.pageDisabled = false;
+        });
+    }
+
     onYCbCr420WorkaroundChanged(event: any, card: number, port: string) {
         if (this.config.getSettings().ycbcr420Workaround.length > card && port in this.config.getSettings().ycbcr420Workaround[card]) {
             this.utils.pageDisabled = true;
@@ -117,11 +145,11 @@ export class GlobalSettingsComponent implements OnInit {
         }
     }
 
-    public buttonToggleTheme() {
-        if (this.utils.getThemeClass() === 'light-theme') {
-            this.utils.setThemeDark();
-        } else {
-            this.utils.setThemeLight();
-        }
+    public async onBrightnessModeCtrlChange() {
+        await this.utils.setBrightnessMode(this.ctrlBrightnessMode.value);
+    }
+
+    gotoComponent(component: string) {
+        this.router.navigate([ component ], { relativeTo: this.route.parent });
     }
 }

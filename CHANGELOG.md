@@ -1,5 +1,118 @@
 # Changelog
 
+## [2.0.8] - 2023-07-14
+### Added
+- Four-zone keyboard backlight GUI support
+- Profile definitions for InfinityBook Pro 16 Gen8
+
+### Changed
+- Zoned keyboard backlight GUI design + usability improvements
+- Extended GUI info text in case keyboard backlight control is not found
+
+### Fixed
+- Occasionally not recognized keyboard backlight
+
+## [2.0.7] - 2023-05-23
+### Added
+- Clarifying info text + link added to battery charging profiles
+- Default profiles for IBP Gen8
+
+### Fixed
+- Wrong keyboard backlight restored after LID wakeup
+- Keyboard backlight GUI hover color
+- Tweaks to GUI loading
+
+## [2.0.5] - 2023-05-04
+### Fixed
+- Keyboard backlight for Stellaris Gen5 membrane version
+- Buffered write for keyboard backlight where available
+  (should greatly speed up keyboard painting for supported devices)
+
+## [2.0.4] - 2023-04-25
+### Added
+- Support for Stellaris 16 Gen5
+
+### Fixed
+- Keyboard backlight color picker missing styles and dark mode
+
+## [2.0.2] - 2023-03-28
+### Fixed
+- Keyboard backlight detection for certain devices like Stellaris and Fusion
+- Keyboard backlight paint order
+- Various text and translation adjustments
+- Error on acpi-cpufreq boost parameter validation
+- Now correctly blurs cpu freq settings when globally disabled
+
+## [2.0.0] - 2023-03-22
+### Added
+- Keyboard backlight GUI (Tools => Keyboard backlight)
+  - Set brightness
+  - Set color for single zone RGB keyboards
+  - Set colors for three-zone RGB keyboards
+  - Implements part of linux' `/sys/class/leds` interface: `kbd_backlight` for (single brightness, multi color/intensity)
+  - Restore last settings on boot
+- Webcam settings (Tools => Webcam)
+  - A number of useful and non-useful parameters exposed to tweak and play around with
+  - Preview of webcam picture while tweaking
+  - Save and restore presets
+  - Chosen preset restored on boot or reconnect of device
+- Tomte GUI (Settings => Tomte)
+  - Graphical interface to TUXEDO Tomte
+  - Exposes most of the knobs Tomte allows you to configure such as
+    - Choose operation mode
+    - View which modules are applied for your device
+    - Change behaviour of modules
+- Backup profile settings
+  - Exporting current custom profiles to file
+  - Importing custom profiles from file
+
+### Changed
+- TDP slider validation behaviour now moves other sliders accordingly instead of limiting currently changed slider
+- Removed CPU settings tabs and consequently allowing setting CPU TDP and CPU frequency settings simultaneously
+- Battery charging settings icon replaced
+- Tools icon replaced
+
+### Fixed
+- Temporary set profile retained when saving tccd settings or profiles
+- Fixes related to keeping and re-applying profiles on save
+
+## [1.2.5] - 2023-03-03
+### Fixed
+- Certain icon sizes and alignment
+- Theme colors sometimes not being applied correctly (like in dropdown menus)
+- Support ticket number validation range extended
+
+## [1.2.4] - 2023-01-11
+### Changed
+- Display backlight brightness now only set when explicitly chosen in profile
+
+### Fixed
+- Inadvertently blended out profile edit system control area now visible again
+- Fan availability conditions tweaked to not falsely show fan control for
+  unsupported devices
+
+## [1.2.3] - 2022-12-21
+### Added
+- Battery charging options for a number of devices
+  - Choose one of three "charging profiles" to influence peak charge and charging time
+  - Choose whether to priorize charging or performance when on USB-C PD
+  - For now available through "Settings" => "Battery charging options" (for devices with this feature)
+  - Tray shortcut coming soon
+
+### Changed
+- Dark/light mode adjustments
+  - Now three options available light, dark and "system setting".
+  - System setting attempts to use advertised system theme mode when
+    choosing TCC theme.
+  - Also fixes some GUI details (like scrollbars) that were not rendered in the correct theme
+- Config reload/save logic of `tccd` no longer requires restart of service
+
+### Fixed
+- Core available check on setting validation (should prevent some log
+  messages when cores are disabled)
+- `xrandr` output on systeminfos execution
+- Disable cpu min/max freq validation for `intel_pstate` while interface is bugged
+
 ## [1.2.2] - 2022-10-17
 ### Changed
 - Fan control logic tweaks and fixes

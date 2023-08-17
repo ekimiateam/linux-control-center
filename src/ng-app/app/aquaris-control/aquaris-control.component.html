@@ -53,7 +53,7 @@ along with TUXEDO Control Center.  If not, see <https://www.gnu.org/licenses/>.
             <!-- Fan control -->
             <div class="category">
                 <header>
-                    <svg viewBox="0 0 302 512" class="tcc-icons"><use href="./assets/images/icon_fan.svg#Icon"></use></svg>
+                    <svg viewBox="0 0 512 512" class="tcc-icons"><use href="./assets/images/icon_fan.svg#Icon"></use></svg>
                     <ng-container i18n="@@aqLabelFanControl">Fan control</ng-container>
                 </header>
                 <button mat-raised-button [matMenuTriggerFor]="fanPresetMenu" i18n="@@aqButtonFanPresetsLabel">Fan presets</button>
@@ -81,7 +81,7 @@ along with TUXEDO Control Center.  If not, see <https://www.gnu.org/licenses/>.
                         maxlength="3">
                     <!--div class="custom-value-text">{{ fanSpeed.value }}</div-->
                     <div class="unit-text">%</div>
-                    <svg viewBox="0 0 302 512" class="icon"><use href="./assets/images/icon_fan.svg#Icon"></use></svg>
+                    <svg viewBox="0 0 512 512" class="icon"><use href="./assets/images/icon_fan.svg#Icon"></use></svg>
                     <div class="legend">
                         <div class="text" i18n="@@aqFanGaugeLegendText">Fan speed</div>
                     </div>
@@ -170,7 +170,7 @@ along with TUXEDO Control Center.  If not, see <https://www.gnu.org/licenses/>.
                 </div>
                 <mat-tab-group mat-stretch-tabs [dynamicHeight]="false" [(selectedIndex)]="selectedLedTab">
                     <mat-tab label="Pick color" i18n-label="@@aqTabLEDColorPickerLabel">
-                        <span class="color-visualizer"
+                        <span class="tcc-color-picker color-visualizer"
                         [style.background]="chosenColorHex"
                         [(colorPicker)]="chosenColorHex"
                         [cpDisableInput]="true"

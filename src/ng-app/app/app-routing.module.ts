@@ -19,19 +19,26 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
+import { LoaderResolver } from './loader.resolver';
+
 import { ProfileManagerComponent } from './profile-manager/profile-manager.component';
 import { SupportComponent } from './support/support.component';
 import { InfoComponent } from './info/info.component';
 import { CpuDashboardComponent } from './cpu-dashboard/cpu-dashboard.component';
-import { ToolsComponent } from "./tools/tool.component";
+import { KeyboardBacklightComponent } from "./keyboard-backlight/keyboard-backlight.component";
+import { ToolsComponent } from './tools/tool.component';
 import { GlobalSettingsComponent } from './global-settings/global-settings.component';
 import { MainGuiComponent } from './main-gui/main-gui.component';
 import { AquarisControlComponent } from './aquaris-control/aquaris-control.component';
+import { WebcamSettingsComponent } from './webcam-settings/webcam-settings.component';
+import { WebcamPreviewComponent } from './webcam-preview/webcam-preview.component';
+import { WebcamSettingsGuard } from './webcam.service';
+import { TomteGuiComponent } from './tomte-gui/tomte-gui.component';
 
 const routes: Routes = [
     { path: '', redirectTo: '/main-gui/cpu-dashboard', pathMatch: 'full' },
     {
-        path: 'main-gui', component: MainGuiComponent,
+        path: 'main-gui', component: MainGuiComponent, resolve: { loaded: LoaderResolver },
         children: [
             { path: 'profile-manager', component: ProfileManagerComponent },
             { path: 'profile-manager/:profileId', component: ProfileManagerComponent },
@@ -39,11 +46,15 @@ const routes: Routes = [
             { path: 'info', component: InfoComponent },
             { path: 'cpu-dashboard', component: CpuDashboardComponent },
             { path: 'tools', component: ToolsComponent },
+            { path: 'keyboard-backlight', component: KeyboardBacklightComponent },
+            { path: 'camera-settings', component: WebcamSettingsComponent, canDeactivate: [WebcamSettingsGuard] },
             { path: 'global-settings', component: GlobalSettingsComponent },
-            { path: 'aquaris-control', component: AquarisControlComponent }
+            { path: 'aquaris-control', component: AquarisControlComponent },
+            { path: 'tomte-gui', component: TomteGuiComponent }
         ]
     },
-    { path: 'aquaris-control', component: AquarisControlComponent }
+    { path: 'webcam-preview', component: WebcamPreviewComponent },
+    { path: 'aquaris-control', component: AquarisControlComponent },
 ];
 
 @NgModule({

@@ -179,9 +179,49 @@ export class TccDBusController {
         }
     }
 
+    async getSettingsJSON(): Promise<string> {
+        try {
+            return await this.interface.GetSettingsJSON();
+        } catch (err) {
+            return undefined;
+        }
+    }
+
     async odmProfilesAvailable(): Promise<string[]> {
         try {
             return await this.interface.ODMProfilesAvailable();
+        } catch (err) {
+            return undefined;
+        }
+    }
+
+    async odmPowerLimits(): Promise<TDPInfo[]> {
+        try {
+            return JSON.parse(await this.interface.ODMPowerLimitsJSON());
+        } catch (err) {
+            return undefined;
+        }
+    }
+
+    async getKeyboardBacklightCapabilitiesJSON(): Promise<string> {
+        try {
+            return await this.interface.GetKeyboardBacklightCapabilitiesJSON();
+        } catch (err) {
+            return undefined;
+        }
+    }
+
+    async getKeyboardBacklightStatesJSON(): Promise<string> {
+        try {
+            return await this.interface.GetKeyboardBacklightStatesJSON();
+        } catch (err) {
+            return undefined;
+        }
+    }
+
+    async setKeyboardBacklightStatesJSON(keyboardBacklightStatesJSON: string): Promise<boolean> {
+        try {
+            return await this.interface.SetKeyboardBacklightStatesJSON(keyboardBacklightStatesJSON);
         } catch (err) {
             return undefined;
         }
@@ -203,11 +243,51 @@ export class TccDBusController {
         }
     }
 
-    async odmPowerLimits(): Promise<TDPInfo[]> {
+    async getChargingProfilesAvailable(): Promise<string[]> {
         try {
-            return JSON.parse(await this.interface.ODMPowerLimitsJSON());
+            return JSON.parse(await this.interface.GetChargingProfilesAvailable());
         } catch (err) {
-            return undefined;
+            return [];
+        }
+    }
+
+    async getCurrentChargingProfile(): Promise<string> {
+        try {
+            return await this.interface.GetCurrentChargingProfile();
+        } catch (err) {
+            return '';
+        }
+    }
+
+    async setChargingProfile(profileDescriptor: string): Promise<boolean> {
+        try {
+            return await this.interface.SetChargingProfile(profileDescriptor);
+        } catch (err) {
+            return false;
+        }
+    }
+
+    async getChargingPrioritiesAvailable(): Promise<string[]> {
+        try {
+            return JSON.parse(await this.interface.GetChargingPrioritiesAvailable());
+        } catch (err) {
+            return [];
+        }
+    }
+
+    async getCurrentChargingPriority(): Promise<string> {
+        try {
+            return await this.interface.GetCurrentChargingPriority();
+        } catch (err) {
+            return '';
+        }
+    }
+
+    async setChargingPriority(priorityDescriptor: string): Promise<boolean> {
+        try {
+            return await this.interface.SetChargingPriority(priorityDescriptor);
+        } catch (err) {
+            return false;
         }
     }
 

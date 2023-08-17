@@ -64,7 +64,7 @@ const maxEnergySave: ITccProfile = {
         minimumFanspeed: 0,
         offsetFanspeed: 0
     },
-    odmProfile: { name: undefined },
+    odmProfile: { name: 'power_save' },
     odmPowerLimits: { tdpValues: [5, 10, 15] }
 };
 
@@ -95,7 +95,7 @@ const silent: ITccProfile = {
         minimumFanspeed: 0,
         offsetFanspeed: 0
     },
-    odmProfile: { name: undefined },
+    odmProfile: { name: 'power_save' },
     odmPowerLimits: { tdpValues: [10, 15, 25] }
 };
 
@@ -126,7 +126,7 @@ const office: ITccProfile = {
         minimumFanspeed: 0,
         offsetFanspeed: 0
     },
-    odmProfile: { name: undefined },
+    odmProfile: { name: 'enthusiast' },
     odmPowerLimits: { tdpValues: [25, 35, 35] }
 };
 
@@ -157,8 +157,70 @@ const highPerformance: ITccProfile = {
         minimumFanspeed: 0,
         offsetFanspeed: 0
     },
-    odmProfile: { name: undefined },
+    odmProfile: { name: 'overboost' },
     odmPowerLimits: { tdpValues: [60, 60, 70] }
+};
+
+export const defaultCustomProfile: ITccProfile = {
+    id: '__default_custom_profile__',
+    name: 'TUXEDO Defaults',
+    description: 'Edit profile to change behaviour',
+    display: {
+        brightness: 100,
+        useBrightness: false
+    },
+    cpu: {
+        onlineCores: undefined,
+        useMaxPerfGov: false,
+        scalingMinFrequency: undefined,
+        scalingMaxFrequency: undefined,
+        governor: 'powersave', // unused: see CpuWorker.ts->applyCpuProfile(...)
+        energyPerformancePreference: 'balance_performance',
+        noTurbo: false
+    },
+    webcam: {
+        status: true,
+        useStatus: true
+    },
+    fan: {
+        useControl: true,
+        fanProfile: 'Balanced',
+        minimumFanspeed: 0,
+        offsetFanspeed: 0
+    },
+    odmProfile: { name: undefined },
+    odmPowerLimits: { tdpValues: [] }
+};
+
+export const defaultMobileCustomProfileTDP: ITccProfile = {
+    id: '__default_mobile_custom_profile__',
+    name: 'TUXEDO Mobile Default',
+    description: 'Edit profile to change behaviour',
+    display: {
+        brightness: 100,
+        useBrightness: false
+    },
+    cpu: {
+        onlineCores: undefined,
+        useMaxPerfGov: false,
+        scalingMinFrequency: undefined,
+        scalingMaxFrequency: 3500000,
+        governor: 'powersave', // unused: see CpuWorker.ts->applyCpuProfile(...)
+        energyPerformancePreference: 'balance_performance',
+        noTurbo: false
+    },
+    webcam: {
+        status: true,
+        useStatus: true
+    },
+    fan: {
+        useControl: true,
+        fanProfile: 'Balanced',
+        minimumFanspeed: 0,
+        offsetFanspeed: 0
+    },
+    odmProfile: { name: undefined },
+    odmPowerLimits: { tdpValues: [15, 25, 50] }
 };
 
 export enum TUXEDODevice {
@@ -166,6 +228,8 @@ export enum TUXEDODevice {
     IBP14G6_TRX,
     IBP14G6_TQF,
     IBP14G7_AQF_ARX,
+    IBPG8MK1,
+    IBP16I08MK2,
     PULSE1502,
     POLARIS1XA02,
     POLARIS1XI02,
@@ -175,6 +239,7 @@ export enum TUXEDODevice {
     STELLARIS1XI03,
     STELLARIS1XI04,
     STEPOL1XA04,
+    STELLARIS1XI05
 };
 
 /*
@@ -186,6 +251,8 @@ deviceProfiles.set(TUXEDODevice.IBP14G6_TUX, [ maxEnergySave, silent, office ]);
 deviceProfiles.set(TUXEDODevice.IBP14G6_TRX, [ maxEnergySave, silent, office ]);
 deviceProfiles.set(TUXEDODevice.IBP14G6_TQF, [ maxEnergySave, silent, office ]);
 deviceProfiles.set(TUXEDODevice.IBP14G7_AQF_ARX, [ maxEnergySave, silent, office ]);
+deviceProfiles.set(TUXEDODevice.IBPG8MK1, [ maxEnergySave, silent, office ]);
+deviceProfiles.set(TUXEDODevice.IBP16I08MK2, [ maxEnergySave, silent, office ]);
 
 deviceProfiles.set(TUXEDODevice.PULSE1502, [ maxEnergySave, silent, office ]);
 
@@ -196,6 +263,13 @@ deviceProfiles.set(TUXEDODevice.POLARIS1XA03, [ maxEnergySave, silent, office, h
 
 deviceProfiles.set(TUXEDODevice.STELLARIS1XI03, [ maxEnergySave, silent, office, highPerformance ]);
 deviceProfiles.set(TUXEDODevice.STELLARIS1XI04, [ maxEnergySave, silent, office, highPerformance ]);
+deviceProfiles.set(TUXEDODevice.STELLARIS1XI05, [ maxEnergySave, silent, office, highPerformance ]);
 
 deviceProfiles.set(TUXEDODevice.STELLARIS1XA03, [ maxEnergySave, silent, office, highPerformance ]);
 deviceProfiles.set(TUXEDODevice.STEPOL1XA04, [ maxEnergySave, silent, office, highPerformance ]);
+
+
+export const deviceCustomProfiles: Map<TUXEDODevice, ITccProfile[]> = new Map();
+
+deviceCustomProfiles.set(TUXEDODevice.IBPG8MK1, [ defaultCustomProfile, defaultMobileCustomProfileTDP ]);
+deviceCustomProfiles.set(TUXEDODevice.IBP16I08MK2, [ defaultCustomProfile, defaultMobileCustomProfileTDP ]);

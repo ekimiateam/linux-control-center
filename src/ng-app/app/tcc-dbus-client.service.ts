@@ -1,5 +1,5 @@
 /*!
- * Copyright (c) 2019-2020 TUXEDO Computers GmbH <tux@tuxedocomputers.com>
+ * Copyright (c) 2019-2022 TUXEDO Computers GmbH <tux@tuxedocomputers.com>
  *
  * This file is part of TUXEDO Control Center.
  *
@@ -22,6 +22,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { FanData } from '../../service-app/classes/TccDBusInterface';
 import { ITccProfile, TccProfile } from '../../common/models/TccProfile';
 import { UtilsService } from './utils.service';
+import { ITccSettings, KeyboardBacklightCapabilitiesInterface, KeyboardBacklightStateInterface } from '../../common/models/TccSettings';
 import { TDPInfo } from '../../native-lib/TuxedoIOAPI';
 import { ConfigService } from './config.service';
 
@@ -43,6 +44,7 @@ export class TccDBusClientService implements OnDestroy {
 
   public available = new Subject<boolean>();
   public tuxedoWmiAvailable = new BehaviorSubject<boolean>(true);
+  public dataLoaded = false;
   public fanData = new BehaviorSubject<IDBusFanData>({cpu: new FanData(), gpu1: new FanData(), gpu2: new FanData() });
 
   public webcamSWAvailable = new BehaviorSubject<boolean>(undefined);
@@ -62,6 +64,12 @@ export class TccDBusClientService implements OnDestroy {
 
   public activeProfile = new BehaviorSubject<TccProfile>(undefined);
   private previousActiveProfileJSON = '';
+
+  public settings = new BehaviorSubject<ITccSettings>(undefined);
+  private previousSettingsJSON = '';
+
+  public keyboardBacklightCapabilities = new BehaviorSubject<KeyboardBacklightCapabilitiesInterface>(undefined);
+  public keyboardBacklightStates = new BehaviorSubject<Array<KeyboardBacklightStateInterface>>(undefined);
 
   public fansMinSpeed = new BehaviorSubject<number>(undefined);
   public fansOffAvailable = new BehaviorSubject<boolean>(undefined);
@@ -83,6 +91,10 @@ export class TccDBusClientService implements OnDestroy {
     }
     // Publish availability as necessary
     if (this.isAvailable !== previousValue) { this.available.next(this.isAvailable); }
+
+    if (!this.isAvailable) {
+        return;
+    }
 
     // Read and publish data (note: atm polled)
     const wmiAvailability = await this.tccDBusInterface.tuxedoWmiAvailable();
@@ -140,10 +152,39 @@ export class TccDBusClientService implements OnDestroy {
         } catch (err) {
             console.log('tcc-dbus-client.service: unexpected error parsing profile lists => ' + err);
         }
+
+        this.dataLoaded = true;
+    }
+    const settingsJSON: string = await this.tccDBusInterface.getSettingsJSON();
+    if (settingsJSON !== undefined) {
+        try {
+            if (this.previousSettingsJSON !== settingsJSON) {
+                this.settings.next(JSON.parse(settingsJSON));
+                this.previousSettingsJSON = settingsJSON;
+            }
+        } catch (err) { console.log('tcc-dbus-client.service: unexpected error parsing settings => ' + err); }
+    }
+
+    const keyboardBacklightCapabilitiesJSON: string = await this.tccDBusInterface.getKeyboardBacklightCapabilitiesJSON();
+    if (keyboardBacklightCapabilitiesJSON !== undefined) {
+        try {
+            this.keyboardBacklightCapabilities.next(JSON.parse(keyboardBacklightCapabilitiesJSON));
+        } catch { console.log('tcc-dbus-client.service: unexpected error parsing keyboard backlight capabilities'); }
+    }
+
+    const keyboardBacklightStatesJSON: string = await this.tccDBusInterface.getKeyboardBacklightStatesJSON();
+    if (keyboardBacklightStatesJSON !== undefined) {
+        try {
+            this.keyboardBacklightStates.next(JSON.parse(keyboardBacklightStatesJSON));
+        } catch { console.log('tcc-dbus-client.service: unexpected error parsing keyboard backlight states'); }
     }
 
     this.fansMinSpeed.next(await this.tccDBusInterface.getFansMinSpeed());
     this.fansOffAvailable.next(await this.tccDBusInterface.getFansOffAvailable());
+  }
+
+  public setKeyboardBacklightStates(keyboardBacklightStates: Array<KeyboardBacklightStateInterface>) {
+    this.tccDBusInterface.setKeyboardBacklightStatesJSON(JSON.stringify(keyboardBacklightStates));
   }
 
   public async triggerUpdate() {
@@ -166,5 +207,13 @@ export class TccDBusClientService implements OnDestroy {
   public async setTempProfileById(profileId: string) {
     const result = await this.tccDBusInterface.dbusAvailable() && await this.tccDBusInterface.setTempProfileById(profileId);
     return result;
+  }
+
+  public getInterface(): TccDBusController | undefined {
+    if (this.isAvailable) {
+        return this.tccDBusInterface;
+    } else {
+        return undefined;
+    }
   }
 }

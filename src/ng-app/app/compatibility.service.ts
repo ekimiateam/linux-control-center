@@ -42,9 +42,10 @@ export class CompatibilityService {
                      (sysVendor !== undefined && sysVendor.toLowerCase().includes('tuxedo'));
 
     if (isTuxedo) {
-      if (deviceName !== undefined &&
-           (deviceName === 'STELLARIS1XI04' ||
-            deviceName === 'STEPOL1XA04')) {
+        if (deviceName !== undefined &&
+            (deviceName === 'STELLARIS1XI04' ||
+             deviceName === 'STEPOL1XA04' ||
+             deviceName === 'STELLARIS1XI05')) {
         showAquarisMenu = true;
       } else {
         showAquarisMenu = false;
@@ -56,7 +57,7 @@ export class CompatibilityService {
   }
 
   get hasFanInfo(): boolean {
-    return this.tccDbus.tuxedoWmiAvailable.value;
+    return this.hasFanControl;
   }
 
   // hasFanControl==true implies hasFanInfo==true, but not the other way around
@@ -67,7 +68,7 @@ export class CompatibilityService {
     if (boardName === "GMxRGxx") {
       return false;
     }*/
-    return this.tccDbus.tuxedoWmiAvailable.value;
+    return this.tccDbus.tuxedoWmiAvailable.value && this.tccDbus.fanData.value.cpu.temp.data.value > 1;
   }
 
   get fanControlCompatibilityMessage(): string {

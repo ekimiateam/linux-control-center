@@ -39,10 +39,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule, MatInput } from '@angular/material/input';
-import { MatTooltipModule} from '@angular/material/tooltip';
-import { MatCheckboxModule} from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatDividerModule} from '@angular/material/divider';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -52,7 +52,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatMenuModule } from '@angular/material/menu'
+import { MatMenuModule } from '@angular/material/menu';
 
 import { DecimalPipe, registerLocaleData } from '@angular/common';
 import { ProfileManagerComponent } from './profile-manager/profile-manager.component';
@@ -74,6 +74,7 @@ import { GaugeModule } from 'angular-gauge';
 import { GlobalSettingsComponent } from './global-settings/global-settings.component';
 import { ShutdownTimerComponent } from './shutdown-timer/shutdown-timer.component';
 import { ToolsComponent } from "./tools/tool.component";
+import { KeyboardBacklightComponent } from "./keyboard-backlight/keyboard-backlight.component";
 import { ChangeCryptPasswordComponent } from './change-crypt-password/change-crypt-password.component';
 import { FanGraphComponent } from './fan-graph/fan-graph.component';
 
@@ -83,6 +84,14 @@ import { MainGuiComponent } from './main-gui/main-gui.component';
 import { AquarisControlComponent } from './aquaris-control/aquaris-control.component';
 import { DialogInputTextComponent } from './dialog-input-text/dialog-input-text.component';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
+import { TomteGuiComponent } from './tomte-gui/tomte-gui.component';
+import { ProfileConflictDialogService } from './profile-conflict-dialog/profile-conflict-dialog.service';
+import { ProfileConflictComponent } from './profile-conflict-dialog/profile-conflict-dialog.component';
+import { ChargingSettingsComponent } from './charging-settings/charging-settings.component';
+import { WebcamSettingsComponent } from "./webcam-settings/webcam-settings.component";
+import { WebcamPreviewComponent } from "./webcam-preview/webcam-preview.component";
+import { DialogChoiceComponent } from './dialog-choice/dialog-choice.component';
+import { KeyboardVisualComponent } from './keyboard-visual/keyboard-visual.component';
 
 registerLocaleData(localeDe, 'de', localeDeExtra);
 
@@ -100,12 +109,20 @@ declare const require;
     GlobalSettingsComponent,
     ShutdownTimerComponent,
     ToolsComponent,
+    KeyboardBacklightComponent,
     ChangeCryptPasswordComponent,
     FanGraphComponent,
     MainGuiComponent,
     AquarisControlComponent,
     DialogInputTextComponent,
-    DialogConfirmComponent
+    DialogConfirmComponent,
+    DialogChoiceComponent,
+    ChargingSettingsComponent,
+    WebcamSettingsComponent,
+    WebcamPreviewComponent,
+    TomteGuiComponent,
+    ProfileConflictComponent,
+    KeyboardVisualComponent,
   ],
   imports: [
     BrowserModule,
@@ -145,11 +162,13 @@ declare const require;
     GaugeModule.forRoot(),
     ChartsModule,
     ColorPickerModule,
-    MatMenuModule
+    MatMenuModule,
+    MatRadioModule
   ],
   providers: [
     DecimalPipe,
-    ThemeService
+    ThemeService,
+    ProfileConflictDialogService
   ],
   bootstrap: [AppComponent]
 })
