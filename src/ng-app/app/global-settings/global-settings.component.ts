@@ -24,6 +24,7 @@ import { Subscription } from 'rxjs';
 import { TccDBusClientService } from '../tcc-dbus-client.service';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AvailabilityService } from "../../../common/classes/availability.service";
 
 @Component({
     selector: 'app-global-settings',
@@ -52,15 +53,26 @@ export class GlobalSettingsComponent implements OnInit {
 
     private subscriptions: Subscription = new Subscription();
 
+    public primeState: string = "iGPU";
+    public expandPrimeSelect: Boolean = false;
+
     constructor(
         private config: ConfigService,
         private utils: UtilsService,
         private tccdbus: TccDBusClientService,
         private router: Router,
         private route: ActivatedRoute,
+        public availability: AvailabilityService
     ) { }
 
     ngOnInit() {
+        this.setValuesFromResolverRoute();
+    
+        const routingFromDashboard = this.route.snapshot.paramMap.get("routingFromDashboard");
+        if (routingFromDashboard) {
+            this.expandPrimeSelect = true;
+        }
+
         this.subscriptions.add(this.tccdbus.forceYUV420OutputSwitchAvailable.subscribe(
             forceYUV420OutputSwitchAvailable => { this.forceYUV420OutputSwitchAvailable = forceYUV420OutputSwitchAvailable; }
         ));
@@ -78,6 +90,23 @@ export class GlobalSettingsComponent implements OnInit {
         this.utils.getBrightnessMode().then((mode) => { this.ctrlBrightnessMode.setValue(mode) });
     }
 
+    setValuesFromResolverRoute() {
+        const paramMap = this.route.snapshot.paramMap;
+        const data = this.route.snapshot.data;
+
+        const routingFromDashboard = paramMap.get("routingFromDashboard");
+        this.expandPrimeSelect = Boolean(routingFromDashboard);
+
+        this.forceYUV420OutputSwitchAvailable =
+            data.forceYUV420OutputSwitchAvailable;
+
+        this.hasChargingSettings =
+            Array.isArray(data.chargingProfilesAvailable) &&
+            data.chargingProfilesAvailable.length > 0;
+
+        this.primeState = data.primeSelectAvailable;
+    }
+    
     onCPUSettingsEnabledChanged(event: any) {
         this.utils.pageDisabled = true;
 
@@ -149,7 +178,11 @@ export class GlobalSettingsComponent implements OnInit {
         await this.utils.setBrightnessMode(this.ctrlBrightnessMode.value);
     }
 
-    gotoComponent(component: string) {
-        this.router.navigate([ component ], { relativeTo: this.route.parent });
+    public gotoComponent(component: string) {
+        this.router.navigate([component], { relativeTo: this.route.parent });
+    }
+
+    public onPrimeStateChanged(newPrimeState: string) {
+        this.primeState = newPrimeState;
     }
 }

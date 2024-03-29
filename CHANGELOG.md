@@ -1,5 +1,76 @@
 # Changelog
 
+## [2.1.7] - 2024-02-22
+### Fixed
+- Always restoring keyboard backlight brightness to zero after lid close
+
+## [2.1.6] - 2024-02-13
+### Added
+- Appstream metainfo for packaging
+- Support for Pulse Gen3 keyboard backlight
+
+### Fixed
+- Webcam view throwing errors not being able to open webcam (most notably on Pulse Gen3)
+- Dashboard
+  - Missing GPU sensor values
+  - Sensor value missing when actually only zero
+  - Alternate display for low numbers instead of rounding down
+- RPM package upgrade ending up without executable link in /usr/bin
+
+## [2.1.5] - 2024-01-25
+### Fixed
+- CPU frequency limits not working for devices using amd-pstate-epp cpufreq driver
+
+## [2.1.4] - 2024-01-18
+### Fixed
+- Fan control issue manifesting as missing temp and speed in dashboard
+
+## [2.1.3] - 2024-01-16
+### Added
+- Support for Aquaris Gen6
+
+### Fixed
+- Custom fan mode. Fixes certain cases where custom fan table did not
+  get applied, throwing errors in log, etc.
+- Disconnection of other bluetooth devices while scanning for Aquaris.
+
+## [2.1.2] - 2023-12-21
+### Added
+- Support for Sirius keyboard backlight
+- Support for Sirius system profiles
+
+### Fixed
+- Issue on tccd start causing one thread to get stuck on full load blocking the initialization for an extended amount of time
+- .Xauthority file not found causing excessive tccd log output
+
+## [2.1.1] - 2023-12-13
+### Added
+- Laptop screen refresh rate configurable per TCC profile allowing
+  configuration of reduced refresh rate in battery operation
+- Fn-lock status viewable and changeable in the tray menu for
+  supported devices
+- Dashboard is extended with CPU and GPU power usage info
+  - CPU power usage is displayed where available in the CPU section
+  - GPU section now shows iGPU or dGPU (or both) depending on graphics mode
+  - GPU section also showing power usage and current frequency where available
+- Charging thresholds (for supported devices) in the Settings => Battery Charging Options area
+  - Allows fine-tuning of how the battery is charged in the form of start and end thresholds
+  - Available to choose from three preset profiles plus a custom mode where the thresholds are freely configurable
+- Fan profiles extended with further options
+  - Maximum fan speed parameter to adjust the preset profiles
+  - All-new custom fan mode that allows configuring of a special fan profile in nine temperature ranges
+
+### Changed
+- Rework of GPU selection in tray menu and additionally added to GUI in Settings => Graphics switching
+
+## [2.0.11] - 2023-11-10
+### Fixed
+- Missing profiles for InfinityBook Pro Gen8
+
+## [2.0.10] - 2023-10-26
+### Added
+- Support for Polaris/Stellaris AMD Gen5
+
 ## [2.0.9] - 2023-09-22
 ### Added
 - Support for Aura Gen3 (default mobile profile)
